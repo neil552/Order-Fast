@@ -34,8 +34,7 @@ import { ProductService } from '../../services/product.service';
       <div class="hero-image">
         <img
           ngSrc="/products/hero.svg"
-          width="1200"
-          height="800"
+          fill
           priority
           alt="Hamburguesa artesanal con queso y papas fritas"
         />
@@ -86,8 +85,7 @@ import { ProductService } from '../../services/product.service';
               <div class="product-image-wrap">
                 <img
                   [ngSrc]="product.image"
-                  width="600"
-                  height="440"
+                  fill
                   [alt]="product.name"
                   loading="lazy"
                 />

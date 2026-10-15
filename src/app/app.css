@@ -4,6 +4,7 @@
   flex-direction: column;
 }
 
+
 .topbar {
   position: sticky;
   top: 0;
@@ -249,7 +250,7 @@
   }
 
   .topbar-actions {
-    gap: 10px;
+    gap: 8px;
   }
 
   .staff-login-link,
@@ -268,6 +269,7 @@
   }
 
   .main-nav a {
+    min-height: 42px;
     font-size: 11px;
     white-space: nowrap;
   }

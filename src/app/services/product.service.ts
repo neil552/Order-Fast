@@ -51,9 +51,10 @@ export class ProductService {
           const isLegacyDemoImage =
             product.image === `/products/${product.id}.svg` ||
             product.image.startsWith('https://images.unsplash.com/');
-          return initial && isLegacyDemoImage
-            ? { ...product, image: initial.image }
-            : product;
+          return {
+            ...product,
+            ...(initial && isLegacyDemoImage ? { image: initial.image } : {}),
+          };
         });
         for (const product of migrated) {
           if (product.image !== saved.find((item) => item.id === product.id)?.image) {
