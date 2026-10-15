@@ -1,0 +1,338 @@
+DOCUMENTACION DEL PROYECTO FASTORDER
+===================================
+
+Version del documento: 15 de octubre de 2026
+Tipo de proyecto: aplicacion frontend Angular y Progressive Web App (PWA)
+Workspace Angular: Order_fast
+
+
+1. RESUMEN
+----------
+
+FastOrder es una demostracion web para explorar un menu, crear pedidos de
+prueba y administrar su flujo en el mismo navegador. El trabajo se implemento
+como frontend: no incluye API, servidor de aplicacion, base de datos externa,
+pagos, ni envio de pedidos a un restaurante.
+
+La tienda y las pantallas del cliente son publicas. Las vistas de cocina y
+administracion tienen un inicio de sesion local de demostracion y un guard de
+Angular para controlar la navegacion desde la interfaz. Como no existe
+autenticacion en un servidor, este mecanismo no debe considerarse seguridad
+real.
+
+
+2. ANALISIS INICIAL Y ALCANCE
+-----------------------------
+
+Antes de implementar se revisaron:
+
+- El workspace Angular existente, su estructura, package.json y angular.json.
+- El PDF de diseno "Sin titulo.pdf", creado como referencia visual en Figma.
+- El PDF academico "PAWD-402_TRABAJOFINAL.pdf" y sus cinco preguntas guia.
+
+El workspace ya utilizaba Angular 21. Se mantuvieron Angular, TypeScript,
+Angular Router y el sistema de pruebas del proyecto, evitando reconstruir el
+workspace o sustituir sus dependencias principales. La aplicacion original era
+principalmente una estructura inicial; las pruebas existentes se usaron como
+punto de partida.
+
+El PDF de diseno presenta una tienda de comida con una identidad oscura y
+calida, tarjetas de productos, busqueda y pantallas de pedido. La identidad
+visual final de FastOrder se actualizo a dorado y azul petroleo oscuro, una
+combinacion de acento calido y tono complementario profundo. La tipografia se
+organiza con DM Sans para textos e interfaz y Outfit para titulos y marca,
+cargadas desde Google Fonts con alternativa sans-serif local.
+Se incorporaron las ocho imagenes WebP suministradas para las tarjetas de
+producto. El hero conserva una ilustracion SVG local de demostracion; por ello
+la implementacion sigue el estilo visual, pero no es una copia exacta de cada
+imagen del PDF de Figma.
+
+Las restricciones que guiaron las decisiones fueron:
+
+- No crear backend, API REST, autenticacion real ni servicio de pagos.
+- Persistir los datos sencillos en el navegador actual.
+- No afirmar que un pedido local fue enviado o sincronizado.
+- Usar rutas y componentes compatibles con la version instalada de Angular.
+
+
+3. DESARROLLO POR FASES
+-----------------------
+
+FASE 1 - ESTRUCTURA Y DISENO
+
+Se definieron areas funcionales independientes, con componentes standalone,
+rutas Angular con carga diferida, modelos tipados y servicios compartidos.
+La interfaz comun se implemento en el componente raiz; el diseno global y
+adaptable se organiza en src/styles.css y src/app/app.css.
+
+Se agregaron las imagenes WebP de productos y un recurso SVG para el hero en
+public/products, ademas de los iconos de instalacion en public/icons. La pagina
+del cliente incorpora hero, filtros por categoria, busqueda, tarjetas de
+productos y acceso al carrito. Los estilos reorganizan la tienda, el carrito,
+la cocina, la administracion y sus tablas para ventanas estrechas. El logo,
+los botones principales y los iconos instalables comparten una paleta dorada
+con azul petroleo oscuro.
+
+FASE 2 - CATALOGO Y CARRITO
+
+El catalogo inicial esta centralizado en src/app/models/fast-order.ts:
+
+- Smash Doble: USD 12.90
+- Combo Bacon Club: USD 16.50
+- Pizza Pepperoni: USD 14.90
+- Papas Loaded: USD 7.90
+- Nuggets Crispy: USD 8.50
+- Shake Chocolate: USD 5.90
+- Classic Cheese: USD 11.50
+- Alitas BBQ: USD 9.90
+
+ProductService comparte y administra productos y categorias. La tienda
+permite buscar, filtrar y agregar productos. CartService gestiona cantidades,
+eliminacion, subtotal y persistencia del carrito. En la confirmacion se
+capturan nombre y observaciones, y se ofrece el cupon de demostracion
+BIENVENIDA (10 por ciento, hasta USD 5). El total se calcula localmente; no se
+realiza ningun cobro.
+
+FASE 3 - PEDIDOS, COCINA Y ADMINISTRACION
+
+OrderService crea identificadores locales, guarda fecha, lineas, subtotal,
+descuento, total y estado inicial. El historial presenta los pedidos de este
+navegador. El tablero de cocina permite avanzar entre Nuevo, En preparacion,
+Listo y Entregado. Cocina e historial comparten el mismo estado local del
+navegador.
+
+El panel administrativo permite buscar, crear, editar, activar, desactivar y
+eliminar productos; gestionar categorias; consultar y filtrar pedidos; cambiar
+estados; ver indicadores calculados con pedidos locales y revisar actividad
+reciente. Los reportes no representan ventas reales ni datos de un restaurante.
+
+FASE 4 - PERSISTENCIA EN EL DISPOSITIVO
+
+LocalDatabaseService abre IndexedDB con nombre fastorder-local y almacenes
+products y orders. IndexedDB guarda el catalogo modificado y los pedidos. En la
+primera carga se inicializa el catalogo de demostracion.
+
+LocalStorageService se utiliza para informacion sencilla del navegador, como
+el carrito, las categorias y la actividad. OnlineStatusService refleja el
+evento de conexion del navegador. Si el usuario crea un pedido estando offline,
+se etiqueta "Pendiente local". Si lo crea estando online, se etiqueta
+"Guardado local"; ninguno de esos estados significa que se haya contactado un
+restaurante.
+
+FASE 5 - ACCESO DE PERSONAL DE DEMOSTRACION
+
+Al solicitar ocultar Cocina y Administracion de la experiencia del cliente,
+se agrego una pantalla de inicio de sesion sin registro. La tienda, el carrito
+y el historial del cliente siguen siendo publicos. AuthService valida las
+credenciales fijas de demostracion y mantiene la sesion en sessionStorage
+hasta cerrar sesion o cerrar la pestana.
+
+staffAccessGuard protege las rutas /cocina y /admin en la navegacion Angular.
+Si no hay sesion, la persona se redirige a /login. El selector flotante de
+vistas operativas solo se muestra durante la sesion de demostracion; el
+encabezado ofrece iniciar o cerrar sesion.
+
+El formulario no muestra ni precarga las credenciales. Los valores de acceso
+de demostracion estan definidos en el servicio de autenticacion del proyecto y
+se guardan aparte para la presentacion. No deben reutilizarse en un sistema
+real. Un usuario puede inspeccionar o alterar el JavaScript del navegador;
+para autenticar personal realmente se necesitarian un backend y autorizacion
+del lado servidor, excluidos del alcance.
+
+FASE 6 - PWA Y RECURSOS WEB
+
+Se habilito @angular/service-worker para produccion y se configuro
+ngsw-config.json para precargar los recursos estaticos de la aplicacion,
+incluidas las imagenes locales de productos. El service worker no se habilita con
+ng serve normal; para comprobar su funcionamiento se debe compilar y servir la
+salida de produccion en localhost o HTTPS.
+
+public/manifest.webmanifest declara nombre, colores, modo standalone, URL de
+inicio e iconos de varios tamanos. Los iconos de interfaz usan Material Symbols
+Rounded de Google Fonts. Se agregaron preconnect y una regla de cache de URL
+remotas. La optimizacion de incrustacion de fuentes en angular.json queda
+desactivada para que el build no dependa de acceder a Google Fonts durante la
+compilacion; los iconos se descargan desde el navegador cuando hay conexion y
+pueden quedar disponibles desde la cache despues de cargarse.
+
+Las notificaciones son locales y dependen del permiso del navegador. No hay
+notificaciones push en segundo plano ni un servidor que envie cambios.
+
+
+4. ORGANIZACION PRINCIPAL DEL CODIGO
+------------------------------------
+
+src/app/app.ts
+  Componente raiz, estado de conexion, instalacion y cierre de sesion.
+
+src/app/app.html y src/app/app.css
+  Encabezado, navegacion publica, selector de vistas para personal y estilos
+  de la estructura global.
+
+src/app/app.routes.ts
+  Rutas de tienda, carrito, historial, acceso, cocina y administracion.
+
+src/app/core/staff-access.guard.ts
+  Control de navegacion de las vistas operativas de demostracion.
+
+src/app/features/customer/customer-page.ts
+  Catalogo, busqueda y filtros.
+
+src/app/features/customer/orders-page.ts
+  Historial local de pedidos.
+
+src/app/features/cart/cart-page.ts
+  Carrito, descuento de demostracion y confirmacion.
+
+src/app/features/auth/login-page.ts
+  Formulario de acceso de personal.
+
+src/app/features/kitchen/kitchen-page.ts
+  Tablero de cocina y cambios de estado.
+
+src/app/features/admin/admin-page.ts
+  Catalogo, categorias, pedidos, indicadores, reportes y configuracion.
+
+src/app/models/fast-order.ts
+  Interfaces y datos iniciales de productos.
+
+src/app/services/
+  Servicios para autenticacion de demo, actividad, carrito, IndexedDB,
+  LocalStorage, estado de conexion, notificaciones, pedidos y productos.
+
+src/styles.css
+  Tipografia, iconos, componentes visuales y estilos responsivos compartidos.
+
+public/
+  Manifest, iconos de PWA, imagenes WebP de productos e ilustracion SVG del hero.
+
+ngsw-config.json
+  Recursos estaticos y recursos externos que el Service Worker puede cachear.
+
+
+5. PRUEBAS Y VERIFICACIONES
+---------------------------
+
+Al cierre de esta documentacion se ejecutaron:
+
+  npm test -- --watch=false
+  Resultado: 5 archivos de prueba aprobados; 10 pruebas aprobadas.
+
+  npm run build
+  Resultado: compilacion de produccion Angular exitosa. La salida se genera en
+  dist/Order_fast/browser e incluye ngsw-worker.js y ngsw.json.
+
+  git diff --check
+  Resultado: sin errores de espacios en blanco en los cambios revisados.
+
+Las pruebas incluyen el componente raiz, servicios de carrito, pedidos y
+autenticacion, y redireccion de las rutas protegidas. Tambien se verifico en el
+navegador el flujo local de pedido, las vistas principales y un pedido
+desconectado etiquetado como pendiente. No se afirma haber probado dispositivos
+fisicos, todos los navegadores ni un despliegue publico.
+
+
+6. INSTRUCCIONES PARA EJECUTAR EN WINDOWS POWERSHELL
+---------------------------------------------------
+
+Abrir PowerShell en la carpeta raiz del proyecto:
+
+  cd C:\Users\USER\Order_fast
+  npm ci
+  npm start
+
+Abrir en el navegador:
+
+  http://localhost:4200/
+
+Para ejecutar las pruebas:
+
+  npm test -- --watch=false
+
+Para compilar:
+
+  npm run build
+
+Para desplegar la PWA, publicar el contenido de:
+
+  dist\Order_fast\browser
+
+El hosting debe usar HTTPS (o localhost durante pruebas) y servir index.html
+como fallback para rutas Angular directas, incluyendo /login, /cocina y /admin.
+La app no necesita ni incluye un servidor de aplicacion propio.
+
+
+7. PREGUNTAS GUIA DEL TRABAJO FINAL
+-----------------------------------
+
+1) Cuales son las ventajas de una PWA en comparacion con una aplicacion nativa
+   para la gestion de pedidos?
+
+FastOrder ofrece una aplicacion web adaptable que se abre mediante un enlace
+y puede instalarse desde navegadores compatibles. Un mismo frontend sirve
+distintos tamanos de pantalla y permite actualizar la aplicacion desde la web.
+Una vez almacenados sus recursos, la interfaz y datos locales de demostracion
+pueden consultarse sin conexion. A diferencia de una plataforma real, esta
+demo no envia pedidos al restaurante ni sincroniza dispositivos.
+
+2) Como se pueden optimizar los tiempos de carga en una PWA mediante el uso de
+   cache en Service Worker?
+
+El Service Worker puede guardar el shell y recursos estaticos para evitar
+solicitudes repetidas y permitir visitas posteriores sin red. FastOrder
+precarga recursos de la aplicacion e imagenes locales WebP/SVG. El Router
+carga las vistas mediante imports diferidos; en produccion debe medirse si
+precargar fragmentos que no se visitan afecta la descarga inicial. Una app con
+datos dinamicos debe seleccionar una estrategia de cache segun la frescura
+requerida y medirla con herramientas como Lighthouse.
+
+3) Que factores se deben considerar al disenar una interfaz de usuario
+   responsiva para una PWA?
+
+Se deben considerar legibilidad, jerarquia visual, objetivos tactiles, uso con
+una mano, accesibilidad, contraste, formularios, estados vacios y el
+comportamiento de tablas y tableros estrechos. FastOrder reorganiza el catalogo,
+carrito y cocina en pantallas pequenas; las tablas administrativas se desplazan
+dentro de su propio contenedor y la navegacion operativa se presenta en un
+selector separado.
+
+4) Como se pueden gestionar notificaciones push en una PWA para mejorar la
+   interaccion con los clientes?
+
+En un sistema real se solicita consentimiento, se registra una suscripcion push
+y un servidor autorizado envia notificaciones pertinentes sin exponer datos
+sensibles. FastOrder solo puede mostrar avisos locales del navegador en el
+mismo dispositivo y con permisos concedidos. No implementa notificaciones push
+remotas ni mensajes en segundo plano porque no tiene backend.
+
+5) Que estrategias se pueden emplear para garantizar que una PWA funcione
+   correctamente sin conexion a internet?
+
+Se cachean los recursos estaticos necesarios, se conservan los datos
+importantes en almacenamiento local, se muestra el estado de conexion y se
+distingue claramente lo guardado localmente de lo enviado a un servidor.
+FastOrder usa el Service Worker, IndexedDB, LocalStorage y estados "Pendiente
+local" y "Guardado local". No simula sincronizacion: al volver internet, el
+pedido sigue en el dispositivo y no se transmite al restaurante.
+
+
+8. LIMITACIONES Y TRABAJO FUTURO
+--------------------------------
+
+- No existe backend, API, base de datos externa, pago ni envio real de pedidos.
+- El inicio de sesion solo controla la interfaz de demostracion y no protege
+  datos frente a manipulacion del cliente.
+- Los datos se comparten solo dentro del almacenamiento del mismo navegador;
+  no entre dispositivos, perfiles o navegadores.
+- Las tarjetas usan las imagenes WebP suministradas; el hero sigue usando una
+  ilustracion SVG y no una fotografia exacta del diseno original de Figma.
+- Las notificaciones no son push de servidor y dependen del soporte y permiso
+  del navegador.
+- El funcionamiento offline depende de que la version de produccion y sus
+  recursos se hayan cargado y almacenado correctamente antes de perder la red.
+- Antes de un uso real se requeririan autenticacion/autorizacion del servidor,
+  API, sincronizacion, validacion de datos, seguridad, privacidad, pruebas
+  multiplataforma y recursos visuales definitivos.
+
+
+FIN DEL DOCUMENTO
