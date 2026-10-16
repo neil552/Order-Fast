@@ -43,7 +43,7 @@ describe('App', () => {
     expect(mainNavigation?.textContent).not.toContain('Cocina');
     expect(mainNavigation?.textContent).not.toContain('Administración');
     expect(viewSwitcher).toBeNull();
-    expect(compiled.querySelector('.staff-login-link')?.textContent).toContain('Acceso personal');
+    expect(compiled.querySelector('.staff-login-link')).toBeNull();
   });
 
   it('should show staff navigation after a successful demo sign-in', async () => {

@@ -170,7 +170,6 @@
   font-size: 11px !important;
 }
 
-.staff-login-link,
 .staff-session-button {
   padding: 9px 11px;
   border: 1px solid #48423e;
@@ -183,7 +182,6 @@
   white-space: nowrap;
 }
 
-.staff-login-link:hover,
 .staff-session-button:hover {
   border-color: var(--gold);
   color: #f0d28a;
@@ -253,7 +251,6 @@
     gap: 8px;
   }
 
-  .staff-login-link,
   .staff-session-button {
     padding: 8px;
     font-size: 10px;

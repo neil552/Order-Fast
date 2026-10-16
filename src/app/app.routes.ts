@@ -31,5 +31,14 @@ export const routes: Routes = [
     canMatch: [staffAccessGuard],
     loadComponent: () => import('./features/admin/admin-page').then((module) => module.AdminPage),
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: 'b/:code',
+    canMatch: [staffAccessGuard],
+    children: [{ path: '', pathMatch: 'full', redirectTo: '/admin' }],
+  },
+  {
+    path: '**',
+    canMatch: [staffAccessGuard],
+    children: [{ path: '', pathMatch: 'full', redirectTo: '/admin' }],
+  },
 ];

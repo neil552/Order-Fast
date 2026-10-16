@@ -34,8 +34,6 @@
     }
     @if (auth.isAuthenticated()) {
       <button class="staff-session-button" (click)="logout()">Cerrar sesión</button>
-    } @else {
-      <a class="staff-login-link" routerLink="/login">Acceso personal</a>
     }
     <a class="cart-link" routerLink="/carrito" aria-label="Abrir carrito">
       <span class="material-symbols-rounded" aria-hidden="true">shopping_bag</span>

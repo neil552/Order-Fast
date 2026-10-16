@@ -7,6 +7,9 @@ export const staffAccessGuard: CanMatchFn = (_route, segments) => {
   if (auth.isAuthenticated()) return true;
 
   const router = inject(Router);
-  const returnUrl = `/${segments.map((segment) => segment.path).join('/')}`;
+  const isStaffRoute = ['admin', 'cocina'].includes(segments[0]?.path ?? '');
+  const returnUrl = isStaffRoute
+    ? `/${segments.map((segment) => segment.path).join('/')}`
+    : '/admin';
   return router.createUrlTree(['/login'], { queryParams: { returnUrl } });
 };
